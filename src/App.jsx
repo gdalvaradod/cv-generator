@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Download, Plus, Trash2, RotateCcw, Moon, Sun, Globe } from 'lucide-react';
+import { FileText, Download, Plus, Trash2, RotateCcw, Moon, Sun, Globe, Camera, Upload, Save, UploadCloud } from 'lucide-react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { CvPdfDocument } from './CvPdfDocument';
 
@@ -10,7 +10,15 @@ const translations = {
     clear: "Limpiar",
     export: "Exportar PDF",
     preparing: "Preparando...",
+    save: "Guardar",
+    import: "Importar",
+    importErr: "Error al leer el archivo. Verifica que sea un JSON válido.",
     personalInfo: "Datos Personales",
+    photo: "Fotografía",
+    uploadPhoto: "Subir foto",
+    removePhoto: "Eliminar",
+    photoSizeErr: "La imagen supera el límite de 10MB.",
+    photoFormatErr: "Formato no válido. Usa JPG, PNG o WebP.",
     name: "Nombre completo",
     role: "Rol o título profesional",
     email: "Correo electrónico",
@@ -41,7 +49,6 @@ const translations = {
     mobileTitle: "Experiencia de Escritorio Recomendada",
     mobileDesc: "My Free CV está diseñado para funcionar mejor en pantallas grandes. La experiencia de diseño, edición y exportación será mucho más cómoda desde una computadora en lugar de un teléfono móvil.",
     mobileBtn: "Entendido, continuar",
-    // Para el PDF
     pdfTitleSummary: "Perfil Profesional",
     pdfTitleExp: "Experiencia Laboral",
     pdfTitleEdu: "Educación",
@@ -54,7 +61,15 @@ const translations = {
     clear: "Clear",
     export: "Export PDF",
     preparing: "Preparing...",
+    save: "Save",
+    import: "Import",
+    importErr: "Error reading the file. Ensure it is a valid JSON.",
     personalInfo: "Personal Details",
+    photo: "Photograph",
+    uploadPhoto: "Upload Photo",
+    removePhoto: "Remove",
+    photoSizeErr: "The image exceeds the 10MB limit.",
+    photoFormatErr: "Invalid format. Use JPG, PNG or WebP.",
     name: "Full Name",
     role: "Professional Title",
     email: "Email Address",
@@ -85,7 +100,6 @@ const translations = {
     mobileTitle: "Desktop Experience Recommended",
     mobileDesc: "My Free CV is designed to work best on larger screens. The layout, editing, and exporting experience will be much more comfortable on a computer rather than a mobile phone.",
     mobileBtn: "I understand, continue",
-    // Para el PDF
     pdfTitleSummary: "Professional Profile",
     pdfTitleExp: "Work Experience",
     pdfTitleEdu: "Education",
@@ -96,7 +110,7 @@ const translations = {
 };
 
 const emptyData = {
-  fullName: '', title: '', email: '', phone: '', location: '', summary: '',
+  photo: '', fullName: '', title: '', email: '', phone: '', location: '', summary: '',
   experiences: [{ company: '', position: '', startYear: '', endYear: '', current: false, description: '' }],
   education: [{ institution: '', degree: '', year: '' }],
   skills: [{ name: '' }],
@@ -104,48 +118,17 @@ const emptyData = {
 };
 
 function App() {
-  // Estado de Idioma
   const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'es');
   const t = translations[lang];
-
-  // Estado de Tema (Dark/Light)
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'dark');
-
-  // Estado de Advertencia Móvil (Evaluado directamente al montar - QA FIX)
+  
   const [showMobileWarning, setShowMobileWarning] = useState(() => {
     const isMobile = window.innerWidth < 768;
     const warningSeen = sessionStorage.getItem('mobileWarningSeen');
     return isMobile && !warningSeen;
   });
 
-  // Inicializar estado con control de excepciones
-  const [cv, setCv] = useState(() => {
-    try {
-      const savedCv = localStorage.getItem('cvData');
-      if (savedCv) {
-        const parsed = JSON.parse(savedCv);
-        const safeExperiences = (parsed.experiences || []).map(exp => ({
-          ...exp,
-          startYear: exp.startYear || '', endYear: exp.endYear || '', current: exp.current || false
-        }));
-        return {
-          ...emptyData, ...parsed,
-          experiences: safeExperiences.length ? safeExperiences : emptyData.experiences,
-          skills: parsed.skills || [{ name: '' }],
-          certifications: parsed.certifications || [{ name: '', year: '', issuer: '' }]
-        };
-      }
-    } catch (error) {
-      console.error("Corrupted CV data in localStorage. Resetting...", error);
-      localStorage.removeItem('cvData');
-    }
-    return emptyData;
-  });
-
-  // Efectos (Guardado y Tema)
-  useEffect(() => {
-    localStorage.setItem('cvData', JSON.stringify(cv));
-  }, [cv]);
+  const [cv, setCv] = useState(emptyData);
 
   useEffect(() => {
     localStorage.setItem('appLang', lang);
@@ -161,7 +144,6 @@ function App() {
     }
   }, [theme]);
 
-  // Manejadores
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleLang = () => setLang(prev => prev === 'es' ? 'en' : 'es');
   const dismissMobileWarning = () => {
@@ -169,7 +151,95 @@ function App() {
     setShowMobileWarning(false);
   };
 
+  const handleExportJSON = () => {
+    const dataStr = JSON.stringify(cv, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `CV_Data_${(cv.fullName || 'MyFreeCV').replace(/\s+/g, '_')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        const safeExperiences = (parsed.experiences || []).map(exp => ({
+          ...exp, startYear: exp.startYear || '', endYear: exp.endYear || '', current: exp.current || false
+        }));
+        
+        setCv({
+          ...emptyData,
+          ...parsed,
+          experiences: safeExperiences.length ? safeExperiences : emptyData.experiences,
+          skills: parsed.skills || emptyData.skills,
+          certifications: parsed.certifications || emptyData.certifications
+        });
+      } catch (error) {
+        console.error("JSON parse error:", error);
+        alert(t.importErr);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; 
+  };
+
   const handleTextChange = (field, val) => setCv(prev => ({ ...prev, [field]: val }));
+  
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert(t.photoSizeErr);
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      alert(t.photoFormatErr);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 400; 
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        setCv(prev => ({ ...prev, photo: compressedBase64 }));
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = null; 
+  };
+
   const handleExpChange = (idx, field, val) => {
     const updated = [...cv.experiences];
     updated[idx][field] = val;
@@ -192,7 +262,6 @@ function App() {
     setCv(prev => ({ ...prev, certifications: updated }));
   };
 
-  // Agregar y eliminar (con aria-labels para Accesibilidad)
   const addExperience = () => setCv(prev => ({ ...prev, experiences: [...prev.experiences, { company: '', position: '', startYear: '', endYear: '', current: false, description: '' }] }));
   const removeExperience = (idx) => setCv(prev => ({ ...prev, experiences: prev.experiences.filter((_, i) => i !== idx) }));
   
@@ -215,9 +284,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 p-6 md:p-10 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* Modal de Advertencia Móvil */}
       {showMobileWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#111111] p-6 rounded-2xl shadow-2xl max-w-sm text-center border border-slate-200 dark:border-slate-800">
@@ -233,55 +301,92 @@ function App() {
         </div>
       )}
 
-      <header className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between pb-6 border-b border-slate-300 dark:border-slate-800 gap-4">
-        <div className="flex items-center gap-3">
-          <FileText className="w-8 h-8 text-indigo-500 dark:text-indigo-400" />
-          <h1 className="text-2xl font-bold tracking-tight">{t.appTitle}</h1>
-        </div>
-        
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {/* Controles de Configuración */}
-          <div className="flex bg-white dark:bg-[#111111] border border-slate-300 dark:border-slate-800 rounded-lg p-1 mr-2 shadow-sm">
-            <button onClick={toggleLang} aria-label="Cambiar idioma" title="Language" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
-              <Globe className="w-4 h-4" />
-            </button>
-            <div className="w-px bg-slate-300 dark:bg-slate-800 mx-1"></div>
-            <button onClick={toggleTheme} aria-label="Alternar tema" title="Dark/Light Mode" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+      <header className="sticky top-0 z-40 bg-slate-50 dark:bg-black py-4 px-6 md:px-10 border-b border-slate-300 dark:border-slate-800 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto flex flex-col xl:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <FileText className="w-8 h-8 text-indigo-500 dark:text-indigo-400" />
+            <h1 className="text-2xl font-bold tracking-tight">{t.appTitle}</h1>
           </div>
-
-          <button 
-            onClick={resetForm}
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm"
-          >
-            <RotateCcw className="w-4 h-4" />
-            {t.clear}
-          </button>
           
-          <PDFDownloadLink
-            document={<CvPdfDocument data={cv} dict={t} />}
-            fileName={`CV_${(cv.fullName || 'Curriculum').replace(/\s+/g, '_')}.pdf`}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm cursor-pointer"
-          >
-            {({ loading }) => (
-              <>
-                <Download className="w-4 h-4" />
-                <span>{loading ? t.preparing : t.export}</span>
-              </>
-            )}
-          </PDFDownloadLink>
+          <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3">
+            <div className="flex bg-white dark:bg-[#111111] border border-slate-300 dark:border-slate-800 rounded-lg p-1 shadow-sm">
+              <button onClick={toggleLang} aria-label="Cambiar idioma" title="Language" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
+                <Globe className="w-4 h-4" />
+              </button>
+              <div className="w-px bg-slate-300 dark:bg-slate-800 mx-1"></div>
+              <button onClick={toggleTheme} aria-label="Alternar tema" title="Dark/Light Mode" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+            </div>
+
+            <label className="flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm cursor-pointer">
+              <UploadCloud className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.import}</span>
+              <input type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
+            </label>
+
+            <button 
+              onClick={handleExportJSON}
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm"
+            >
+              <Save className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.save}</span>
+            </button>
+
+            <button 
+              onClick={resetForm}
+              className="flex items-center gap-2 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="hidden sm:inline">{t.clear}</span>
+            </button>
+            
+            <PDFDownloadLink
+              document={<CvPdfDocument data={cv} dict={t} />}
+              fileName={`CV_${(cv.fullName || 'Curriculum').replace(/\s+/g, '_')}.pdf`}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors shadow-sm cursor-pointer ml-1"
+            >
+              {({ loading }) => (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">{loading ? t.preparing : t.export}</span>
+                </>
+              )}
+            </PDFDownloadLink>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="max-w-7xl mx-auto px-6 md:px-10 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* COLUMNA IZQUIERDA: FORMULARIO */}
         <section className="space-y-6 lg:col-span-7">
           
-          {/* Datos Personales */}
           <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{t.personalInfo}</h2>
+            
+            {/* SOLUCIÓN: Botón de Subir Foto con clases Flexbox propias y alineación horizontal */}
+            <div className="flex items-center gap-4 mb-2">
+              <div className="relative w-20 h-20 rounded-full bg-slate-100 dark:bg-[#111111] border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                {cv.photo ? (
+                  <img src={cv.photo} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-6 h-6 text-slate-400" />
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 cursor-pointer w-fit text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-3 py-1.5 rounded-md transition-colors" title={t.uploadPhoto}>
+                  <Upload className="w-4 h-4" />
+                  <span>{t.uploadPhoto}</span>
+                  <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handlePhotoUpload} />
+                </label>
+                {cv.photo && (
+                  <button type="button" onClick={() => setCv(prev => ({...prev, photo: ''}))} className="text-xs text-rose-500 hover:text-rose-600 font-medium text-left px-1 w-fit">
+                    {t.removePhoto}
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input className="input-field" placeholder={t.name} value={cv.fullName} onChange={e => handleTextChange('fullName', e.target.value)} />
               <input className="input-field" placeholder={t.role} value={cv.title} onChange={e => handleTextChange('title', e.target.value)} />
@@ -292,12 +397,11 @@ function App() {
             <textarea rows={3} className="input-field resize-none w-full" placeholder={t.summary} value={cv.summary} onChange={e => handleTextChange('summary', e.target.value)} />
           </div>
 
-          {/* Experiencia Laboral */}
           <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{t.experience}</h2>
-              <button type="button" onClick={addExperience} className="btn-add">
-                <Plus className="w-3.5 h-3.5" /> {t.add}
+              <button type="button" onClick={addExperience} className="btn-add" title={t.add}>
+                <Plus className="w-4 h-4" />
               </button>
             </div>
             {cv.experiences.map((exp, i) => (
@@ -326,12 +430,11 @@ function App() {
             ))}
           </div>
 
-          {/* Educación */}
           <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{t.education}</h2>
-              <button type="button" onClick={addEducation} className="btn-add">
-                <Plus className="w-3.5 h-3.5" /> {t.add}
+              <button type="button" onClick={addEducation} className="btn-add" title={t.add}>
+                <Plus className="w-4 h-4" />
               </button>
             </div>
             {cv.education.map((edu, i) => (
@@ -351,12 +454,11 @@ function App() {
             ))}
           </div>
 
-          {/* Certificados y Entrenamientos */}
           <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{t.certs}</h2>
-              <button type="button" onClick={addCertification} className="btn-add">
-                <Plus className="w-3.5 h-3.5" /> {t.add}
+              <button type="button" onClick={addCertification} className="btn-add" title={t.add}>
+                <Plus className="w-4 h-4" />
               </button>
             </div>
             {cv.certifications.map((cert, i) => (
@@ -376,12 +478,11 @@ function App() {
             ))}
           </div>
 
-          {/* Habilidades */}
           <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{t.skills}</h2>
-              <button type="button" onClick={addSkill} className="btn-add">
-                <Plus className="w-3.5 h-3.5" /> {t.add}
+              <button type="button" onClick={addSkill} className="btn-add" title={t.add}>
+                <Plus className="w-4 h-4" />
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -398,22 +499,26 @@ function App() {
 
         </section>
 
-        {/* COLUMNA DERECHA: VISTA PREVIA (La hoja de papel siempre es blanca) */}
         <section className="lg:col-span-5 relative">
-          <div className="sticky top-8 bg-white text-slate-900 p-8 rounded-xl shadow-xl min-h-[600px] border border-slate-200 overflow-hidden">
+          <div className="sticky top-28 bg-white text-slate-900 p-8 rounded-xl shadow-xl min-h-[600px] border border-slate-200 overflow-hidden">
             
-            <div className="border-b-2 border-indigo-600 pb-4 mb-4">
-              <h2 className="text-2xl font-bold">{cv.fullName || t.name}</h2>
-              <p className="text-indigo-600 font-medium text-sm">{cv.title || t.role}</p>
-              <p className="text-slate-500 text-[11px] mt-1">
-                {[cv.email, cv.phone, cv.location].filter(Boolean).join(' • ')}
-              </p>
+            <div className="flex items-center gap-5 border-b-2 border-indigo-600 pb-4 mb-4">
+              {cv.photo && (
+                <img src={cv.photo} alt="Profile" className="w-20 h-20 rounded-full object-cover shadow-sm border border-slate-200 flex-shrink-0" />
+              )}
+              <div className="flex flex-col justify-center">
+                <h2 className="text-2xl font-bold leading-tight">{cv.fullName || t.name}</h2>
+                <p className="text-indigo-600 font-medium text-sm mt-0.5">{cv.title || t.role}</p>
+                <p className="text-slate-500 text-[11px] mt-1.5">
+                  {[cv.email, cv.phone, cv.location].filter(Boolean).join(' • ')}
+                </p>
+              </div>
             </div>
 
             {cv.summary && (
               <div className="mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b pb-1 mb-2">{t.pdfTitleSummary}</h3>
-                <p className="text-[11px] text-slate-700 leading-relaxed text-justify">{cv.summary}</p>
+                <p className="text-[11px] text-slate-700 leading-relaxed text-justify whitespace-pre-wrap break-words">{cv.summary}</p>
               </div>
             )}
 
@@ -429,7 +534,7 @@ function App() {
                       </span>
                     </div>
                     <div className="text-[11px] text-slate-600 italic">{exp.company}</div>
-                    <p className="text-[11px] text-slate-700 mt-1 leading-relaxed text-justify">{exp.description}</p>
+                    <p className="text-[11px] text-slate-700 mt-1 leading-relaxed text-justify whitespace-pre-wrap break-words">{exp.description}</p>
                   </div>
                 ))}
               </div>
@@ -479,13 +584,12 @@ function App() {
         </section>
       </main>
 
-      {/* Clases CSS dinámicas extraídas por limpieza en el JSX */}
       <style>{`
         .input-field {
           @apply bg-slate-50 dark:bg-[#111111] border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors;
         }
         .btn-add {
-          @apply flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-3 py-1.5 rounded-md transition-colors;
+          @apply flex items-center justify-center p-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-md transition-colors;
         }
       `}</style>
     </div>

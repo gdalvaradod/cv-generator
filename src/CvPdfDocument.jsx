@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 
 Font.register({
   family: 'Open Sans',
@@ -11,10 +11,16 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Open Sans', color: '#1e293b' },
-  header: { borderBottomWidth: 2, borderBottomColor: '#3b82f6', paddingBottom: 12, marginBottom: 16 },
+  
+  // Nuevo layout del Header con Flex Row para soportar la foto
+  header: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: '#3b82f6', paddingBottom: 12, marginBottom: 16 },
+  photo: { width: 70, height: 70, borderRadius: 35, objectFit: 'cover', marginRight: 18 },
+  headerTextContainer: { flex: 1, flexDirection: 'column', justifyContent: 'center' },
+  
   name: { fontSize: 24, fontWeight: 'bold', color: '#0f172a' },
   role: { fontSize: 14, color: '#3b82f6', marginTop: 4 },
   contact: { fontSize: 10, color: '#64748b', marginTop: 6 },
+  
   section: { marginTop: 16, width: '100%' }, 
   sectionTitle: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', color: '#1e293b', borderBottomWidth: 1, borderBottomColor: '#cbd5e1', paddingBottom: 4, marginBottom: 10 },
   item: { marginBottom: 14, width: '100%' },
@@ -23,29 +29,33 @@ const styles = StyleSheet.create({
   itemTitle: { fontWeight: 'bold', fontSize: 12, color: '#0f172a' },
   itemDate: { fontSize: 10, color: '#64748b', textAlign: 'right', minWidth: 80 },
   itemSubtitle: { fontSize: 11, color: '#475569', fontStyle: 'italic', marginBottom: 5 },
-  textContainer: { flexDirection: 'row', width: '100%' },
-  itemDesc: { flex: 1, fontSize: 10, color: '#334155', lineHeight: 1.5, textAlign: 'justify' },
-  skillItem: { flex: 1, fontSize: 10, color: '#334155', lineHeight: 1.5, marginLeft: 8, marginBottom: 2 }
+  
+  itemDesc: { width: '100%', fontSize: 10, color: '#334155', lineHeight: 1.5, textAlign: 'justify' },
+  skillItem: { width: '100%', fontSize: 10, color: '#334155', lineHeight: 1.5, marginLeft: 8, marginBottom: 2 }
 });
 
 export const CvPdfDocument = ({ data, dict }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       
+      {/* Header con foto opcional */}
       <View style={styles.header}>
-        <Text style={styles.name}>{data.fullName || dict.name}</Text>
-        <Text style={styles.role}>{data.title || dict.role}</Text>
-        <Text style={styles.contact}>
-          {[data.email, data.phone, data.location].filter(Boolean).join('  |  ')}
-        </Text>
+        {data.photo && (
+          <Image src={data.photo} style={styles.photo} />
+        )}
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.name}>{data.fullName || dict.name}</Text>
+          <Text style={styles.role}>{data.title || dict.role}</Text>
+          <Text style={styles.contact}>
+            {[data.email, data.phone, data.location].filter(Boolean).join('  |  ')}
+          </Text>
+        </View>
       </View>
 
       {data.summary && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{dict.pdfTitleSummary}</Text>
-          <View style={styles.textContainer}>
-            <Text style={styles.itemDesc}>{data.summary}</Text>
-          </View>
+          <Text style={styles.itemDesc}>{data.summary}</Text>
         </View>
       )}
 
@@ -63,9 +73,7 @@ export const CvPdfDocument = ({ data, dict }) => (
                 </Text>
               </View>
               <Text style={styles.itemSubtitle}>{exp.company}</Text>
-              <View style={styles.textContainer}>
-                <Text style={styles.itemDesc}>{exp.description}</Text>
-              </View>
+              {exp.description ? <Text style={styles.itemDesc}>{exp.description}</Text> : null}
             </View>
           ))}
         </View>
@@ -109,9 +117,7 @@ export const CvPdfDocument = ({ data, dict }) => (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{dict.pdfTitleSkills}</Text>
           {data.skills.filter(s => s.name).map((skill, i) => (
-            <View key={i} style={styles.textContainer}>
-              <Text style={styles.skillItem}>{i + 1}. {skill.name}</Text>
-            </View>
+            <Text key={i} style={styles.skillItem}>{i + 1}. {skill.name}</Text>
           ))}
         </View>
       )}
