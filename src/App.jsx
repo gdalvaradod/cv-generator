@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Download, Plus, Trash2, RotateCcw, Moon, Sun, Globe, Camera, Upload, Save, UploadCloud } from 'lucide-react';
+import { FileText, Download, Plus, Trash2, RotateCcw, Moon, Sun, Globe, Camera, Upload, Save, UploadCloud, HelpCircle, X } from 'lucide-react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { CvPdfDocument } from './CvPdfDocument';
 
@@ -12,7 +12,8 @@ const translations = {
     preparing: "Preparando...",
     save: "Guardar",
     import: "Importar",
-    importErr: "Error al leer el archivo. Verifica que sea un JSON válido.",
+    help: "Ayuda / Instrucciones",
+    importErr: "Error al leer el archivo. Verifica que sea un archivo de respaldo válido.",
     personalInfo: "Datos Personales",
     photo: "Fotografía",
     uploadPhoto: "Subir foto",
@@ -54,7 +55,28 @@ const translations = {
     pdfTitleEdu: "Educación",
     pdfTitleCerts: "Certificados y Entrenamientos",
     pdfTitleSkills: "Habilidades",
-    present: "Presente"
+    present: "Presente",
+    // --- GUÍA DE AYUDA ---
+    helpTitle: "¿Cómo usar My Free CV?",
+    helpSubtitle: "Guía rápida para crear y descargar tu currículum en minutos.",
+    helpStep1Title: "1. Llena tus datos y mira la vista previa",
+    helpStep1Desc: "Escribe tu información en los cuadros de la izquierda. A medida que escribas, verás cómo va quedando tu hoja de vida en tiempo real del lado derecho. Si necesitas escribir listas en tu experiencia, presiona la tecla 'Enter' para bajar de renglón.",
+    helpStep2Title: "2. Agrega tu fotografía (Opcional)",
+    helpStep2Desc: "Haz clic en 'Subir foto' para elegir una imagen desde tu dispositivo (JPG o PNG, máximo 10MB). La aplicación la recortará automáticamente en forma circular para que luzca profesional.",
+    helpStep3Title: "3. Añade o quita bloques",
+    helpStep3Desc: "Usa el botón '+' en las esquinas de Experiencia, Educación, Certificados o Habilidades para agregar más espacios. Si te equivocas, usa el ícono del bote de basura rojo para borrar ese bloque.",
+    helpStep4Title: "4. Barra superior de herramientas",
+    helpBtnPdfTitle: "Exportar PDF:",
+    helpBtnPdfDesc: "Descarga tu currículum listo para imprimir o enviar por correo.",
+    helpBtnSaveTitle: "Guardar:",
+    helpBtnSaveDesc: "Por tu privacidad, esta página no guarda tus datos al cerrarse. Usa este botón para descargar una copia de respaldo en tu computadora.",
+    helpBtnImportTitle: "Importar:",
+    helpBtnImportDesc: "Si guardaste una copia anteriormente y quieres actualizarla, selecciona tu archivo aquí y todo el formulario se llenará automáticamente.",
+    helpBtnClearTitle: "Limpiar:",
+    helpBtnClearDesc: "Borra todo lo que has escrito para empezar un currículum nuevo desde cero.",
+    helpBtnIconsTitle: "Íconos (Globo y Sol/Luna):",
+    helpBtnIconsDesc: "Cambia el idioma de toda la página (Español/Inglés) o alterna entre modo claro y oscuro.",
+    helpCloseBtn: "¡Entendido!"
   },
   en: {
     appTitle: "My Free CV",
@@ -63,7 +85,8 @@ const translations = {
     preparing: "Preparing...",
     save: "Save",
     import: "Import",
-    importErr: "Error reading the file. Ensure it is a valid JSON.",
+    help: "Help / Instructions",
+    importErr: "Error reading the file. Ensure it is a valid backup file.",
     personalInfo: "Personal Details",
     photo: "Photograph",
     uploadPhoto: "Upload Photo",
@@ -105,7 +128,28 @@ const translations = {
     pdfTitleEdu: "Education",
     pdfTitleCerts: "Certifications & Training",
     pdfTitleSkills: "Skills",
-    present: "Present"
+    present: "Present",
+    // --- HELP GUIDE ---
+    helpTitle: "How to use My Free CV?",
+    helpSubtitle: "Quick guide to create and download your resume in minutes.",
+    helpStep1Title: "1. Fill in your details & preview live",
+    helpStep1Desc: "Type your information into the boxes on the left. As you type, you will see how your resume looks in real time on the right. To create bullet lists in your descriptions, simply press 'Enter' to start a new line.",
+    helpStep2Title: "2. Add your photo (Optional)",
+    helpStep2Desc: "Click 'Upload Photo' to pick a picture from your device (JPG or PNG, up to 10MB). The app will automatically crop it into a neat circle.",
+    helpStep3Title: "3. Add or remove sections",
+    helpStep3Desc: "Use the '+' button on the corners of Experience, Education, Certifications, or Skills to add more entries. Use the red trash icon to delete any entry.",
+    helpStep4Title: "4. Top toolbar buttons",
+    helpBtnPdfTitle: "Export PDF:",
+    helpBtnPdfDesc: "Downloads your final resume ready to print or send via email.",
+    helpBtnSaveTitle: "Save:",
+    helpBtnSaveDesc: "For your privacy, this website does not store your data when closed. Click here to download a backup file to your computer.",
+    helpBtnImportTitle: "Import:",
+    helpBtnImportDesc: "If you saved a backup file earlier and want to edit it, load your file here and the entire form will fill out automatically.",
+    helpBtnClearTitle: "Clear:",
+    helpBtnClearDesc: "Erases everything on screen so you can start a brand new resume from scratch.",
+    helpBtnIconsTitle: "Icons (Globe & Sun/Moon):",
+    helpBtnIconsDesc: "Switch the entire website language (English/Spanish) or toggle between light and dark mode.",
+    helpCloseBtn: "Got it!"
   }
 };
 
@@ -121,6 +165,7 @@ function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('appLang') || 'es');
   const t = translations[lang];
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'dark');
+  const [showHelpModal, setShowHelpModal] = useState(false);
   
   const [showMobileWarning, setShowMobileWarning] = useState(() => {
     const isMobile = window.innerWidth < 768;
@@ -286,6 +331,7 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
+      {/* Modal de Advertencia Móvil */}
       {showMobileWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#111111] p-6 rounded-2xl shadow-2xl max-w-sm text-center border border-slate-200 dark:border-slate-800">
@@ -293,10 +339,78 @@ function App() {
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">{t.mobileDesc}</p>
             <button 
               onClick={dismissMobileWarning} 
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-colors"
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-colors cursor-pointer"
             >
               {t.mobileBtn}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Ayuda / Instrucciones */}
+      {showHelpModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+          onClick={() => setShowHelpModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-[#111111] rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabecera del Modal */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <HelpCircle className="w-6 h-6 text-indigo-500" />
+                  {t.helpTitle}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t.helpSubtitle}</p>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)} 
+                aria-label="Cerrar ayuda"
+                className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Cuerpo con Scroll */}
+            <div className="p-6 overflow-y-auto space-y-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <div>
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{t.helpStep1Title}</h4>
+                <p>{t.helpStep1Desc}</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{t.helpStep2Title}</h4>
+                <p>{t.helpStep2Desc}</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{t.helpStep3Title}</h4>
+                <p>{t.helpStep3Desc}</p>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-[#0a0a0a] p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2.5">
+                <h4 className="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">{t.helpStep4Title}</h4>
+                <p><strong className="text-slate-900 dark:text-white">{t.helpBtnPdfTitle}</strong> {t.helpBtnPdfDesc}</p>
+                <p><strong className="text-slate-900 dark:text-white">{t.helpBtnSaveTitle}</strong> {t.helpBtnSaveDesc}</p>
+                <p><strong className="text-slate-900 dark:text-white">{t.helpBtnImportTitle}</strong> {t.helpBtnImportDesc}</p>
+                <p><strong className="text-slate-900 dark:text-white">{t.helpBtnClearTitle}</strong> {t.helpBtnClearDesc}</p>
+                <p><strong className="text-slate-900 dark:text-white">{t.helpBtnIconsTitle}</strong> {t.helpBtnIconsDesc}</p>
+              </div>
+            </div>
+
+            {/* Pie del Modal */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end bg-slate-50 dark:bg-[#0a0a0a]">
+              <button 
+                onClick={() => setShowHelpModal(false)} 
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-2 rounded-lg transition-colors cursor-pointer"
+              >
+                {t.helpCloseBtn}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -310,11 +424,15 @@ function App() {
           
           <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3">
             <div className="flex bg-white dark:bg-[#111111] border border-slate-300 dark:border-slate-800 rounded-lg p-1 shadow-sm">
-              <button onClick={toggleLang} aria-label="Cambiar idioma" title="Language" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
+              <button onClick={() => setShowHelpModal(true)} aria-label={t.help} title={t.help} className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                <HelpCircle className="w-4 h-4" />
+              </button>
+              <div className="w-px bg-slate-300 dark:bg-slate-800 mx-1"></div>
+              <button onClick={toggleLang} aria-label="Cambiar idioma" title="Language" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors cursor-pointer">
                 <Globe className="w-4 h-4" />
               </button>
               <div className="w-px bg-slate-300 dark:bg-slate-800 mx-1"></div>
-              <button onClick={toggleTheme} aria-label="Alternar tema" title="Dark/Light Mode" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors">
+              <button onClick={toggleTheme} aria-label="Alternar tema" title="Dark/Light Mode" className="p-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors cursor-pointer">
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
             </div>
@@ -327,7 +445,7 @@ function App() {
 
             <button 
               onClick={handleExportJSON}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm"
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span className="hidden sm:inline">{t.save}</span>
@@ -335,7 +453,7 @@ function App() {
 
             <button 
               onClick={resetForm}
-              className="flex items-center gap-2 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm"
+              className="flex items-center gap-2 text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 bg-white hover:bg-slate-100 dark:bg-[#111111] dark:hover:bg-slate-900 text-sm font-medium px-3 md:px-4 py-2.5 rounded-lg transition-colors border border-slate-300 dark:border-slate-800 shadow-sm cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               <span className="hidden sm:inline">{t.clear}</span>
@@ -364,7 +482,6 @@ function App() {
           <div className="bg-white dark:bg-[#0a0a0a] p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{t.personalInfo}</h2>
             
-            {/* SOLUCIÓN: Botón de Subir Foto con clases Flexbox propias y alineación horizontal */}
             <div className="flex items-center gap-4 mb-2">
               <div className="relative w-20 h-20 rounded-full bg-slate-100 dark:bg-[#111111] border border-slate-300 dark:border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
                 {cv.photo ? (
@@ -380,7 +497,7 @@ function App() {
                   <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handlePhotoUpload} />
                 </label>
                 {cv.photo && (
-                  <button type="button" onClick={() => setCv(prev => ({...prev, photo: ''}))} className="text-xs text-rose-500 hover:text-rose-600 font-medium text-left px-1 w-fit">
+                  <button type="button" onClick={() => setCv(prev => ({...prev, photo: ''}))} className="text-xs text-rose-500 hover:text-rose-600 font-medium text-left px-1 w-fit cursor-pointer">
                     {t.removePhoto}
                   </button>
                 )}
@@ -408,7 +525,7 @@ function App() {
               <div key={i} className="p-4 bg-slate-50 dark:bg-[#111111] rounded-lg border border-slate-200 dark:border-slate-800 space-y-3 relative">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t.expNum}{i + 1}</span>
-                  <button aria-label="Eliminar" type="button" onClick={() => removeExperience(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1">
+                  <button aria-label="Eliminar" type="button" onClick={() => removeExperience(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1 cursor-pointer">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -441,7 +558,7 @@ function App() {
               <div key={i} className="p-4 bg-slate-50 dark:bg-[#111111] rounded-lg border border-slate-200 dark:border-slate-800 space-y-2 relative">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t.eduNum}{i + 1}</span>
-                  <button aria-label="Eliminar" type="button" onClick={() => removeEducation(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1">
+                  <button aria-label="Eliminar" type="button" onClick={() => removeEducation(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1 cursor-pointer">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -465,7 +582,7 @@ function App() {
               <div key={i} className="p-4 bg-slate-50 dark:bg-[#111111] rounded-lg border border-slate-200 dark:border-slate-800 space-y-2 relative">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t.certNum}{i + 1}</span>
-                  <button aria-label="Eliminar" type="button" onClick={() => removeCertification(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1">
+                  <button aria-label="Eliminar" type="button" onClick={() => removeCertification(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-1 cursor-pointer">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -489,7 +606,7 @@ function App() {
               {cv.skills.map((skill, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input className="input-field flex-1" placeholder={`${t.skillNum}${i + 1}`} value={skill.name} onChange={e => handleSkillChange(i, e.target.value)} />
-                  <button aria-label="Eliminar" type="button" onClick={() => removeSkill(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-2 bg-slate-50 dark:bg-[#111111] rounded-lg border border-slate-200 dark:border-slate-800">
+                  <button aria-label="Eliminar" type="button" onClick={() => removeSkill(i)} className="text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 p-2 bg-slate-50 dark:bg-[#111111] rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -589,7 +706,7 @@ function App() {
           @apply bg-slate-50 dark:bg-[#111111] border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors;
         }
         .btn-add {
-          @apply flex items-center justify-center p-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-md transition-colors;
+          @apply flex items-center justify-center p-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-md transition-colors cursor-pointer;
         }
       `}</style>
     </div>
