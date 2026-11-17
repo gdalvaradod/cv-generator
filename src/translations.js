@@ -102,7 +102,10 @@ export const translations = {
     helpStep2Desc: "Usa los botones punteados al final de cada sección para agregar más historial. Si te equivocas, usa el ícono del bote de basura rojo para borrar ese bloque.",
     helpStep3Title: "3. Respalda y Exporta",
     helpStep3Desc: "Desliza el menú de plantillas para elegir tu favorita. Usa 'Guardar' para descargar una copia de respaldo. Cuando estés listo, presiona 'Exportar PDF'.",
-    helpCloseBtn: "¡Entendido!"
+    helpCloseBtn: "¡Entendido!",
+    // FOOTER
+    footerDev: "Desarrollado con ❤️ por Geovanny Alvarado",
+    footerContact: "Contacto:"
   },
   en: {
     appTitle: "My Free CV",
@@ -197,6 +200,9 @@ export const translations = {
     helpStep2Desc: "Use the dashed 'Add' buttons at the bottom of each section to add more history. You can delete any block using the red trash icon.",
     helpStep3Title: "3. Backup and Export",
     helpStep3Desc: "Swipe the templates menu to pick your favorite. Use 'Save' to download a backup file. When ready, click 'Export PDF'.",
-    helpCloseBtn: "Got it!"
+    helpCloseBtn: "Got it!",
+    // FOOTER
+    footerDev: "Developed with ❤️ by Geovanny Alvarado",
+    footerContact: "Contact:"
   }
 };

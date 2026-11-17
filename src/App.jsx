@@ -203,12 +203,10 @@ function App() {
     return [start, endDate].filter(Boolean).join(' - ');
   };
 
-  // Función interna para renderizar la vista previa según la plantilla
   const renderPreviewContent = () => {
     if (template === 'creative') {
       return (
         <div className="flex flex-col sm:flex-row min-h-[600px] w-full rounded-xl overflow-hidden shadow-2xl border border-slate-200">
-          {/* BARRA LATERAL (Sidebar) */}
           <div className="w-full sm:w-1/3 bg-slate-800 text-slate-100 p-6 flex flex-col items-center text-center sm:text-left sm:items-start">
             {cv.photo && (
               <img src={cv.photo} alt="Profile" className="w-28 h-28 rounded-full object-cover border-4 border-slate-600 shadow-md mb-4 mx-auto sm:mx-0" />
@@ -234,7 +232,6 @@ function App() {
             )}
           </div>
           
-          {/* CONTENIDO PRINCIPAL */}
           <div className="w-full sm:w-2/3 bg-white p-8">
             {cv.summary && (
               <div className="mb-6">
@@ -293,7 +290,6 @@ function App() {
       );
     }
 
-    // Renderizado para Standard, Harvard, Awesome, Minimalist
     return (
       <div className={`bg-white text-slate-900 p-8 rounded-xl shadow-2xl min-h-[600px] border border-slate-200 overflow-hidden ${template === 'harvard' ? 'font-serif' : ''}`}>
         
@@ -409,7 +405,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-20">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
       {showMobileWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
@@ -514,7 +510,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 md:px-10 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-6 md:px-10 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         
         <section className="space-y-8 lg:col-span-7">
           
@@ -696,7 +692,6 @@ function App() {
         <section className="lg:col-span-5 relative">
           <div className="sticky top-24 space-y-5">
             
-            {/* UX FIX: SELECTOR DE PLANTILLAS PROMINENTE CON AFFORDANCE DE SCROLL */}
             <div className="relative w-full rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner overflow-hidden">
               <div className="bg-slate-200/50 dark:bg-[#0a0a0a] p-1.5 flex items-center gap-1 overflow-x-auto hide-scrollbar relative z-10">
                 {[
@@ -719,18 +714,31 @@ function App() {
                   </button>
                 ))}
               </div>
-              {/* Degradado y Flecha que indican que se puede hacer scroll hacia la derecha */}
               <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-slate-200 dark:from-black to-transparent pointer-events-none flex items-center justify-end pr-2 z-20">
                 <ChevronRight className="w-5 h-5 text-slate-500 dark:text-slate-400 animate-pulse drop-shadow-md" />
               </div>
             </div>
 
-            {/* RENDERIZADOR DE LA VISTA PREVIA */}
             {renderPreviewContent()}
 
           </div>
         </section>
       </main>
+
+      {/* FOOTER */}
+      <footer className="w-full py-8 mt-auto border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black transition-colors">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center gap-2 text-center">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            {t.footerDev} • v0.9.0 Beta
+          </p>
+          <a 
+            href="mailto:geovanny.alvaradod@gmail.com" 
+            className="text-[11px] text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+          >
+            {t.footerContact} geovanny.alvaradod@gmail.com
+          </a>
+        </div>
+      </footer>
 
       <style>{`
         .hide-scrollbar::-webkit-scrollbar { display: none; }
