@@ -10,6 +10,7 @@ export const emptyData = {
 
 export const translations = {
   es: {
+    // APLICACIÓN
     appTitle: "My Free CV",
     clear: "Limpiar",
     export: "Exportar PDF",
@@ -56,13 +57,11 @@ export const translations = {
     skills: "Habilidades",
     addSkill: "Añadir habilidad",
     skillNum: "Habilidad #",
-    // NOMBRES DE PLANTILLAS
     tplStandard: "Estándar (Moderna)",
     tplHarvard: "Harvard (ATS Clásica)",
     tplAwesome: "Awesome (Tech & IT)",
     tplMinimalist: "Minimalista (Cronológica)",
     tplCreative: "Creativa (Barra Lateral)",
-    // PLACEHOLDERS
     phName: "Ej. Juan Pérez",
     phRole: "Ej. Desarrollador Web",
     phEmail: "correo@ejemplo.com",
@@ -80,7 +79,6 @@ export const translations = {
     phCertName: "Ej. Certificación en AWS Cloud",
     phIssuer: "Ej. Amazon Web Services",
     phSkill: "Ej. JavaScript, React, Node.js",
-    // MODALES
     confirmClearTitle: "Borrar currículum",
     confirmClear: "¿Estás seguro de que deseas borrar todo el formulario? Esta acción no se puede deshacer.",
     btnCancel: "Cancelar",
@@ -97,17 +95,36 @@ export const translations = {
     helpTitle: "¿Cómo usar la aplicación?",
     helpSubtitle: "Guía rápida para crear tu CV perfecto.",
     helpStep1Title: "1. Llena tus datos de forma intuitiva",
-    helpStep1Desc: "Escribe tu información en los cuadros de la izquierda. A medida que escribas, verás cómo va quedando tu hoja de vida en tiempo real del lado derecho. Si necesitas escribir listas en tu experiencia, presiona la tecla 'Enter' para bajar de renglón.",
+    helpStep1Desc: "Escribe tu información en los cuadros de la izquierda. A medida que escribas, verás cómo va quedando tu hoja de vida en tiempo real del lado derecho.",
     helpStep2Title: "2. Personaliza tus secciones",
-    helpStep2Desc: "Usa los botones punteados al final de cada sección para agregar más historial. Si te equivocas, usa el ícono del bote de basura rojo para borrar ese bloque.",
+    helpStep2Desc: "Usa los botones punteados al final de cada sección para agregar más historial.",
     helpStep3Title: "3. Respalda y Exporta",
-    helpStep3Desc: "Desliza el menú de plantillas para elegir tu favorita. Usa 'Guardar' para descargar una copia de respaldo. Cuando estés listo, presiona 'Exportar PDF'.",
+    helpStep3Desc: "Desliza el menú de plantillas para elegir tu favorita. Usa 'Guardar' para descargar un respaldo. Cuando estés listo, presiona 'Exportar PDF'.",
     helpCloseBtn: "¡Entendido!",
-    // FOOTER
     footerDev: "Desarrollado con ❤️ por Geovanny Alvarado",
-    footerContact: "Contacto:"
+    footerContact: "Contacto:",
+
+    // LANDING PAGE
+    landingHeroTitle: "Crea un currículum invencible en minutos.",
+    landingHeroSub: "Diseños optimizados para algoritmos ATS, 100% gratuitos y centrados en la privacidad. Sin registros ni pagos ocultos.",
+    landingCta: "Crear mi CV ahora",
+    landingFeatTitle: "¿Por qué elegir My Free CV?",
+    landingFeat1Title: "Privacidad Absoluta",
+    landingFeat1Desc: "Todo el procesamiento se realiza en tu navegador. Tus datos personales nunca se envían a ningún servidor en la nube.",
+    landingFeat2Title: "Optimizado para ATS",
+    landingFeat2Desc: "Plantillas diseñadas estructuralmente para ser legibles por los robots de RRHH y atractivas para el ojo humano.",
+    landingFeat3Title: "100% Gratuito y Libre",
+    landingFeat3Desc: "Sin marcas de agua molestas, sin funciones premium bloqueadas y sin necesidad de crear una cuenta.",
+    landingStepsTitle: "Tres simples pasos",
+    landingStep1: "Llena tus datos",
+    landingStep1Desc: "Un formulario limpio e intuitivo con vista previa en tiempo real.",
+    landingStep2: "Elige tu diseño",
+    landingStep2Desc: "Cambia entre diseños clásicos, modernos o creativos con un solo clic.",
+    landingStep3: "Exporta y Respalda",
+    landingStep3Desc: "Descarga tu PDF listo para enviar y guarda un archivo JSON de respaldo."
   },
   en: {
+    // APP
     appTitle: "My Free CV",
     clear: "Clear",
     export: "Export PDF",
@@ -154,13 +171,11 @@ export const translations = {
     skills: "Skills",
     addSkill: "Add skill",
     skillNum: "Skill #",
-    // TEMPLATE NAMES
     tplStandard: "Standard (Modern)",
     tplHarvard: "Harvard (ATS Classic)",
     tplAwesome: "Awesome (Tech & IT)",
     tplMinimalist: "Minimalist (Timeline)",
     tplCreative: "Creative (Sidebar)",
-    // PLACEHOLDERS
     phName: "e.g. John Doe",
     phRole: "e.g. Web Developer",
     phEmail: "email@example.com",
@@ -178,7 +193,6 @@ export const translations = {
     phCertName: "e.g. AWS Cloud Certification",
     phIssuer: "e.g. Amazon Web Services",
     phSkill: "e.g. JavaScript, React, Node.js",
-    // MODALS
     confirmClearTitle: "Clear Resume",
     confirmClear: "Are you sure you want to clear the entire form? This action cannot be undone.",
     btnCancel: "Cancel",
@@ -195,14 +209,32 @@ export const translations = {
     helpTitle: "How to use the app?",
     helpSubtitle: "Quick guide to create your perfect resume.",
     helpStep1Title: "1. Fill in your details intuitively",
-    helpStep1Desc: "Type your information into the boxes on the left. As you type, you will see how your resume looks in real time on the right. To create bullet lists in your descriptions, simply press 'Enter' to start a new line.",
+    helpStep1Desc: "Type your information into the boxes on the left. As you type, you will see how your resume looks in real time on the right.",
     helpStep2Title: "2. Customize your sections",
-    helpStep2Desc: "Use the dashed 'Add' buttons at the bottom of each section to add more history. You can delete any block using the red trash icon.",
+    helpStep2Desc: "Use the dashed 'Add' buttons at the bottom of each section to add more history.",
     helpStep3Title: "3. Backup and Export",
     helpStep3Desc: "Swipe the templates menu to pick your favorite. Use 'Save' to download a backup file. When ready, click 'Export PDF'.",
     helpCloseBtn: "Got it!",
-    // FOOTER
     footerDev: "Developed with ❤️ by Geovanny Alvarado",
-    footerContact: "Contact:"
+    footerContact: "Contact:",
+
+    // LANDING PAGE
+    landingHeroTitle: "Build an unbeatable resume in minutes.",
+    landingHeroSub: "ATS-optimized designs, 100% free, and privacy-first. No sign-ups, no hidden paywalls.",
+    landingCta: "Build my CV now",
+    landingFeatTitle: "Why choose My Free CV?",
+    landingFeat1Title: "Absolute Privacy",
+    landingFeat1Desc: "All processing happens in your browser. Your personal data is never sent to any cloud server.",
+    landingFeat2Title: "ATS Optimized",
+    landingFeat2Desc: "Structurally designed templates to be readable by HR robots and attractive to the human eye.",
+    landingFeat3Title: "100% Free & Open",
+    landingFeat3Desc: "No annoying watermarks, no locked premium features, and no account creation required.",
+    landingStepsTitle: "Three simple steps",
+    landingStep1: "Fill in your data",
+    landingStep1Desc: "A clean and intuitive form with real-time preview.",
+    landingStep2: "Choose your design",
+    landingStep2Desc: "Switch between classic, modern, or creative designs with a single click.",
+    landingStep3: "Export & Backup",
+    landingStep3Desc: "Download your ready-to-send PDF and save a backup JSON file."
   }
 };

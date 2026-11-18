@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
 
+// Registrar fuentes necesarias
 Font.register({
   family: 'Open Sans',
   fonts: [
@@ -9,6 +10,7 @@ Font.register({
   ]
 });
 
+// Estilos dinámicos generador por plantilla
 const getStyles = (template) => {
   const baseColors = {
     standard: { primary: '#3b82f6', text: '#334155', title: '#0f172a' },
@@ -68,8 +70,9 @@ const getStyles = (template) => {
       marginRight: isHarvard ? 0 : 18, 
       marginBottom: isHarvard ? 10 : 0 
     },
+    // FIX: Se elimina flex: 1 en Harvard para evitar superposición vertical
     headerTextContainer: { 
-      flex: 1, 
+      flex: isHarvard ? undefined : 1, 
       flexDirection: 'column', 
       justifyContent: 'center', 
       alignItems: isHarvard ? 'center' : 'flex-start' 
@@ -78,10 +81,18 @@ const getStyles = (template) => {
       fontSize: isHarvard ? 26 : 24, 
       fontWeight: 'bold', 
       color: c.title,
-      textTransform: isHarvard ? 'uppercase' : 'none'
+      textTransform: isHarvard ? 'uppercase' : 'none',
+      marginBottom: isHarvard ? 4 : 0
     },
-    role: { fontSize: 14, color: c.primary, marginTop: 4, fontStyle: isHarvard ? 'italic' : 'normal', fontWeight: isHarvard ? 'bold' : 'normal' },
-    contact: { fontSize: 10, color: '#64748b', marginTop: 6 },
+    role: { 
+      fontSize: 14, 
+      color: c.primary, 
+      marginTop: isHarvard ? 0 : 4, 
+      fontStyle: isHarvard ? 'italic' : 'normal', 
+      fontWeight: isHarvard ? 'bold' : 'normal',
+      marginBottom: isHarvard ? 6 : 0
+    },
+    contact: { fontSize: 10, color: '#64748b', marginTop: isHarvard ? 0 : 6 },
     
     section: { marginTop: 16, width: '100%' }, 
     sectionTitle: { 
@@ -100,10 +111,23 @@ const getStyles = (template) => {
     itemLeftCol: { width: '22%', paddingRight: 10, alignItems: 'flex-end' },
     itemRightCol: { width: template === 'minimalist' ? '78%' : '100%' },
     
-    itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 3 },
+    // FIX: Se asegura que el header ocupe el 100% y alinee perfectamente a los extremos
+    itemHeader: { 
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      alignItems: 'flex-start', 
+      marginBottom: 3,
+      width: '100%'
+    },
     itemTitleContainer: { flex: 1, paddingRight: 10 },
     itemTitle: { fontWeight: 'bold', fontSize: 12, color: c.title },
-    itemDate: { fontSize: 10, color: '#64748b', textAlign: 'right', minWidth: 80, fontWeight: template === 'minimalist' ? 'bold' : 'normal' },
+    // FIX: Se eliminó minWidth para que textAlign right funcione de forma natural pegado al borde
+    itemDate: { 
+      fontSize: 10, 
+      color: '#64748b', 
+      textAlign: 'right',
+      fontWeight: template === 'minimalist' ? 'bold' : 'normal' 
+    },
     itemSubtitle: { 
       fontSize: 11, 
       color: template === 'harvard' ? '#000' : (template === 'awesome' ? '#e11d48' : (isCreative ? '#64748b' : c.primary)), 
@@ -127,7 +151,6 @@ export const CvPdfDocument = ({ data, dict, template = 'standard' }) => {
   const isMinimalist = template === 'minimalist';
   const isCreative = template === 'creative';
 
-  // Usamos una función de renderizado en lugar de un Componente Anidado para evitar errores de linter
   const renderMainContent = () => (
     <>
       {data.summary && (
